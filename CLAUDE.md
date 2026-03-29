@@ -248,13 +248,6 @@ docker run -it -p 14321:14321 -v agent-vault-data:/data infisical/agent-vault
 - Runs as non-root user `agentvault` (UID 65532)
 - Health check: `GET /health`
 
-## Fly.io Deployment
-
-- `fly.toml` -- Fly.io app config (port 14321, health check, persistent volume)
-- `scripts/docker-entrypoint.sh` -- Docker entrypoint; forwards arguments to `agent-vault` binary (which natively reads `AGENT_VAULT_MASTER_PASSWORD` env var)
-- Deploy: `make deploy` (or `fly deploy`)
-- Persistent volume `agent_vault_data` mounted at `/data` for SQLite database
-
 ## Testing
 
 - Run tests: `make test` (or `go test ./...`)

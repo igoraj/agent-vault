@@ -25,8 +25,7 @@ export default function Navbar({ email, vaultName, isOwner }: NavbarProps) {
       </div>
       <div className="flex items-center gap-3">
         <div className="relative group">
-          {/* TODO: update docs URL */}
-          <a href="#" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:bg-bg transition-colors">
+          <a href="https://github.com/Infisical/agent-vault" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:bg-bg transition-colors">
             <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
               <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
