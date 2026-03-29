@@ -20,23 +20,48 @@ Agent ────▶ Agent Vault Proxy ────▶ api.stripe.com
 
 ## Install
 
-### Homebrew (macOS / Linux)
-
-```bash
-brew install infisical/get-cli/agent-vault
-```
-
-### GitHub Releases
+### GitHub Releases (macOS / Linux)
 
 Download the latest binary for your platform from
-[Releases](https://github.com/Infisical/agent-vault/releases/latest).
+[Releases](https://github.com/Infisical/agent-vault/releases/latest), then:
+
+```bash
+# macOS (Apple Silicon)
+curl -Lo agent-vault.tar.gz https://github.com/Infisical/agent-vault/releases/latest/download/agent-vault_0.1.0_darwin_arm64.tar.gz
+tar xzf agent-vault.tar.gz
+sudo mv agent-vault /usr/local/bin/
+
+# macOS (Intel)
+curl -Lo agent-vault.tar.gz https://github.com/Infisical/agent-vault/releases/latest/download/agent-vault_0.1.0_darwin_amd64.tar.gz
+tar xzf agent-vault.tar.gz
+sudo mv agent-vault /usr/local/bin/
+
+# Linux (x86_64)
+curl -Lo agent-vault.tar.gz https://github.com/Infisical/agent-vault/releases/latest/download/agent-vault_0.1.0_linux_amd64.tar.gz
+tar xzf agent-vault.tar.gz
+sudo mv agent-vault /usr/local/bin/
+
+# Linux (ARM64)
+curl -Lo agent-vault.tar.gz https://github.com/Infisical/agent-vault/releases/latest/download/agent-vault_0.1.0_linux_arm64.tar.gz
+tar xzf agent-vault.tar.gz
+sudo mv agent-vault /usr/local/bin/
+```
+
+### Docker
+
+```bash
+docker run -it -p 14321:14321 -v agent-vault-data:/data infisical/agent-vault
+```
 
 ### From source
+
+Requires [Go 1.25+](https://go.dev/dl/) and [Node.js 22+](https://nodejs.org/).
 
 ```bash
 git clone https://github.com/Infisical/agent-vault.git
 cd agent-vault
 make build
+sudo mv agent-vault /usr/local/bin/
 ```
 
 ### Verify a release (optional)
@@ -44,14 +69,14 @@ make build
 Every release includes SHA-256 checksums and a [cosign](https://github.com/sigstore/cosign) signature for supply-chain security. No keys to manage — verification uses GitHub's OIDC identity.
 
 ```bash
-# Download the checksums and signature from the release page, then:
+# Download the checksums and signature bundle from the release page, then:
 
 # 1. Verify the binary hasn't been tampered with
 sha256sum --check checksums.txt
 
 # 2. Verify the checksums were signed by the Infisical/agent-vault GitHub Actions workflow
 cosign verify-blob \
-  --signature checksums.txt.sig \
+  --bundle checksums.txt.bundle \
   --certificate-identity-regexp "github.com/Infisical/agent-vault" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   checksums.txt

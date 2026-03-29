@@ -9,35 +9,32 @@ Agent Vault ships as a single binary that acts as both the server and the CLI cl
 
 <Tabs>
   <Tab title="macOS">
-    **Prerequisites**: [Go 1.25+](https://go.dev/dl/), [Node.js 22+](https://nodejs.org/)
+    Download the pre-built binary from [GitHub Releases](https://github.com/Infisical/agent-vault/releases/latest):
 
     ```bash
-    git clone https://github.com/infisical/agent-vault.git
-    cd agent-vault
-    make build
+    # Apple Silicon (M1/M2/M3/M4)
+    curl -Lo agent-vault.tar.gz https://github.com/Infisical/agent-vault/releases/latest/download/agent-vault_0.1.0_darwin_arm64.tar.gz
+
+    # Intel
+    curl -Lo agent-vault.tar.gz https://github.com/Infisical/agent-vault/releases/latest/download/agent-vault_0.1.0_darwin_amd64.tar.gz
+
+    tar xzf agent-vault.tar.gz
     sudo mv agent-vault /usr/local/bin/
     ```
   </Tab>
   <Tab title="Linux">
-    **Prerequisites**: [Go 1.25+](https://go.dev/dl/), [Node.js 22+](https://nodejs.org/)
+    Download the pre-built binary from [GitHub Releases](https://github.com/Infisical/agent-vault/releases/latest):
 
     ```bash
-    git clone https://github.com/infisical/agent-vault.git
-    cd agent-vault
-    make build
+    # x86_64
+    curl -Lo agent-vault.tar.gz https://github.com/Infisical/agent-vault/releases/latest/download/agent-vault_0.1.0_linux_amd64.tar.gz
+
+    # ARM64
+    curl -Lo agent-vault.tar.gz https://github.com/Infisical/agent-vault/releases/latest/download/agent-vault_0.1.0_linux_arm64.tar.gz
+
+    tar xzf agent-vault.tar.gz
     sudo mv agent-vault /usr/local/bin/
     ```
-  </Tab>
-  <Tab title="Windows">
-    **Prerequisites**: [Go 1.25+](https://go.dev/dl/), [Node.js 22+](https://nodejs.org/), [Git](https://git-scm.com/)
-
-    ```powershell
-    git clone https://github.com/infisical/agent-vault.git
-    cd agent-vault
-    make build
-    ```
-
-    Add the `agent-vault.exe` binary to your `PATH`.
   </Tab>
   <Tab title="Docker">
     No build tools required. Pull the image and run:
@@ -47,6 +44,16 @@ Agent Vault ships as a single binary that acts as both the server and the CLI cl
     ```
 
     See [Docker deployment](/self-hosting/docker) for configuration options, Docker Compose, and volume management.
+  </Tab>
+  <Tab title="From source">
+    **Prerequisites**: [Go 1.25+](https://go.dev/dl/), [Node.js 22+](https://nodejs.org/)
+
+    ```bash
+    git clone https://github.com/Infisical/agent-vault.git
+    cd agent-vault
+    make build
+    sudo mv agent-vault /usr/local/bin/
+    ```
   </Tab>
 </Tabs>
 
