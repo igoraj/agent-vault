@@ -3,7 +3,7 @@ version: 2
 before:
   hooks:
     # Build the frontend so it's embedded in the Go binary.
-    - cmd: make web
+    - make web
 
 builds:
   - id: agent-vault
