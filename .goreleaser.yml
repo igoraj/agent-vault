@@ -49,7 +49,7 @@ signs:
     args:
       - "sign-blob"
       - "--yes"
-      - "--output-signature=${signature}"
+      - "--bundle=${signature}"
       - "${artifact}"
 
 changelog:
@@ -91,7 +91,7 @@ release:
 
     # Verify signature (requires cosign)
     cosign verify-blob \
-      --signature checksums.txt.sig \
+      --bundle checksums.txt.bundle \
       --certificate-identity-regexp "github.com/Infisical/agent-vault" \
       --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
       checksums.txt
