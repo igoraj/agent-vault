@@ -88,11 +88,11 @@ cosign verify-blob \
 agent-vault server -d
 
 # Register (first user becomes owner) and log in
-./agent-vault register
-./agent-vault login
+agent-vault register
+agent-vault login
 
 # Launch your agent through Agent Vault
-./agent-vault vault run -- claude
+agent-vault vault run -- claude
 ```
 
 Ask the agent to call an external API. It discovers available services, proposes access for anything missing, and presents you with a browser link to approve.
