@@ -13,11 +13,11 @@ Agents should not possess credentials. Agent Vault eliminates credential exfiltr
 <a href="https://docs.agent-vault.dev">Documentation</a> | <a href="https://docs.agent-vault.dev/installation">Installation</a> | <a href="https://docs.agent-vault.dev/reference/cli">CLI Reference</a> | <a href="https://infisical.com/slack">Slack</a>
 </p>
 
-## Why Agent Vault
-
 <p align="center">
   <img src="assets/agent-vault.gif" alt="Agent Vault demo" />
 </p>
+
+## Why Agent Vault
 
 Secret managers return credentials directly to the caller. This breaks down with AI agents, which are non-deterministic systems vulnerable to prompt injection that can be tricked into exfiltrating secrets.
 
