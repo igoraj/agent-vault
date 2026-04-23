@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -234,6 +235,14 @@ func (s *Server) handleProxy(w http.ResponseWriter, r *http.Request) {
 	// 9. Forward request to target.
 	resp, err := proxyClient.Do(outReq)
 	if err != nil {
+		// Log the actual error for operators (includes details like TLS failures,
+		// connection refused, DNS errors, etc.) while sending sanitized message to client.
+		s.logger.Debug("upstream request failed",
+			slog.String("vault_id", ns.ID),
+			slog.String("vault_name", ns.Name),
+			slog.String("target_host", targetHost),
+			slog.String("error", err.Error()),
+		)
 		// Sanitize error — do not leak internal IPs or hostnames to the agent.
 		proxyError(w, http.StatusBadGateway, "upstream_error",
 			fmt.Sprintf("Failed to reach %s", targetHost))
