@@ -44,16 +44,16 @@ func isValidProxyHost(host string) bool {
 
 // newProxyClient creates an HTTP client for outbound proxy requests.
 // It uses a safe DialContext that blocks connections to forbidden IP ranges
-// based on the AGENT_VAULT_NETWORK_MODE setting.
+// based on AGENT_VAULT_ALLOW_PRIVATE_RANGES and AGENT_VAULT_NETWORK_ALLOWLIST.
 func newProxyClient() *http.Client {
-	mode := netguard.ModeFromEnv()
+	allowPrivate := netguard.AllowPrivateFromEnv()
 	return &http.Client{
 		Timeout: 30 * time.Second,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
 		Transport: &http.Transport{
-			DialContext: netguard.SafeDialContext(mode),
+			DialContext: netguard.SafeDialContext(allowPrivate),
 		},
 	}
 }
