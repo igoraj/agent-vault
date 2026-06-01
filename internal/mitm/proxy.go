@@ -38,6 +38,7 @@ import (
 	"github.com/Infisical/agent-vault/internal/brokercore"
 	"github.com/Infisical/agent-vault/internal/ca"
 	"github.com/Infisical/agent-vault/internal/netguard"
+	"github.com/Infisical/agent-vault/internal/packagescanner"
 	"github.com/Infisical/agent-vault/internal/ratelimit"
 	"github.com/Infisical/agent-vault/internal/requestlog"
 )
@@ -55,6 +56,7 @@ type Proxy struct {
 	logger      *slog.Logger
 	rateLimit   *ratelimit.Registry // shared with the HTTP server; nil = no-op
 	logSink     requestlog.Sink     // never nil (Nop default); shared with the HTTP server
+	scanner     *packagescanner.Scanner
 }
 
 // Options carries the dependencies a Proxy needs. BaseURL is the
@@ -70,7 +72,8 @@ type Options struct {
 	BaseURL     string
 	Logger      *slog.Logger
 	RateLimit   *ratelimit.Registry
-	LogSink     requestlog.Sink // nil → Nop
+	LogSink     requestlog.Sink          // nil → Nop
+	Scanner     *packagescanner.Scanner // optional package malware scanner
 }
 
 // New builds a Proxy bound to addr. The returned Proxy does not begin
@@ -99,6 +102,7 @@ func New(addr string, opts Options) *Proxy {
 		logger:    opts.Logger,
 		rateLimit: opts.RateLimit,
 		logSink:   sink,
+		scanner:   opts.Scanner,
 	}
 
 	p.httpServer = &http.Server{

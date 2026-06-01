@@ -58,6 +58,7 @@ func BuildProxyEnv(p ProxyEnvParams) []string {
 		"CURL_CA_BUNDLE=" + p.CAPath,
 		"GIT_SSL_CAINFO=" + p.CAPath,
 		"DENO_CERT=" + p.CAPath,
+		"PIP_CERT=" + p.CAPath,
 	}
 }
 
@@ -66,8 +67,11 @@ func BuildProxyEnv(p ProxyEnvParams) []string {
 // stripped before appending these.
 var ProxyEnvKeys = []string{
 	"HTTPS_PROXY",
+	"https_proxy",
 	"HTTP_PROXY",
+	"http_proxy",
 	"NO_PROXY",
+	"no_proxy",
 	"NODE_USE_ENV_PROXY",
 	"OPENCLAW_PROXY_URL",
 	"SSL_CERT_FILE",
@@ -76,6 +80,7 @@ var ProxyEnvKeys = []string{
 	"CURL_CA_BUNDLE",
 	"GIT_SSL_CAINFO",
 	"DENO_CERT",
+	"PIP_CERT",
 }
 
 // BuildContainerEnv returns the KEY=VALUE entries to pass to `docker

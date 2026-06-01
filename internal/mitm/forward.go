@@ -1,7 +1,9 @@
 package mitm
 
 import (
+	"compress/gzip"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net"
@@ -11,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Infisical/agent-vault/internal/brokercore"
+	"github.com/Infisical/agent-vault/internal/packagescanner"
 	"github.com/Infisical/agent-vault/internal/ratelimit"
 	"github.com/Infisical/agent-vault/internal/requestlog"
 )
@@ -224,6 +227,26 @@ func (p *Proxy) forwardRequest(
 	outReq.Host = hostHeaderForScheme(scheme, target)
 	outReq.ContentLength = contentLength
 
+	if p.scanner != nil && p.scanner.Enabled() {
+		if eco, ok := p.scanner.ShouldModifyMetadata(host, outReq.URL.String()); ok {
+			p.logger.Debug("scanner modifying metadata request headers", "ecosystem", eco, "url", outReq.URL.String())
+			p.scanner.ModifyRequestHeaders(eco, outReq.URL.String(), outReq.Header)
+		}
+
+		if result := p.scanner.CheckDownload(host, outReq.URL.String()); result != nil {
+			p.logger.Warn("scanner blocked download",
+				"reason", result.Reason,
+				"ecosystem", result.Eco,
+				"package", result.Package,
+				"version", result.Version,
+				"url", outReq.URL.String(),
+			)
+			http.Error(w, result.Message, result.HTTPCode)
+			emit(result.HTTPCode, "package_"+result.Reason)
+			return
+		}
+	}
+
 	inject, err := p.creds.Inject(r.Context(), scope.VaultID, host, r.URL.Path)
 	if inject != nil {
 		event.MatchedService = inject.MatchedName
@@ -291,8 +314,49 @@ func (p *Proxy) forwardRequest(
 	}
 	defer func() { _ = resp.Body.Close() }()
 
+	if p.scanner != nil && resp.StatusCode == http.StatusOK {
+		if eco, ok := p.scanner.ShouldModifyMetadata(host, outReq.URL.String()); ok {
+			p.logger.Debug("scanner modifying metadata response", "ecosystem", eco, "url", outReq.URL.String())
+			readBody := io.Reader(resp.Body)
+			if strings.Contains(strings.ToLower(resp.Header.Get("Content-Encoding")), "gzip") {
+				gr, err := gzip.NewReader(resp.Body)
+				if err == nil {
+					readBody = gr
+					defer func() { _ = gr.Close() }()
+					packagescanner.ClearContentEncoding(resp.Header)
+				}
+			}
+			bodyBytes, err := io.ReadAll(io.LimitReader(readBody, brokercore.MaxResponseBytes))
+			if err == nil {
+				_ = resp.Body.Close()
+				modified := p.scanner.ModifyResponse(eco, outReq.URL.String(), bodyBytes, resp.Header)
+				if len(modified) != len(bodyBytes) || string(modified) != string(bodyBytes) {
+					p.logger.Debug("scanner modified metadata response", "ecosystem", eco, "original_bytes", len(bodyBytes), "modified_bytes", len(modified))
+					packagescanner.ClearCachingHeaders(resp.Header)
+				} else {
+					p.logger.Debug("scanner did not modify metadata response", "ecosystem", eco)
+				}
+				resp.ContentLength = int64(len(modified))
+				resp.Header.Set("Content-Length", fmt.Sprintf("%d", len(modified)))
+				for k, vv := range resp.Header {
+					if brokercore.ShouldStripResponseHeader(k) {
+						continue
+					}
+					for _, v := range vv {
+						w.Header().Add(k, v)
+					}
+				}
+				w.WriteHeader(resp.StatusCode)
+				_, _ = w.Write(modified)
+				emit(resp.StatusCode, "")
+				return
+			}
+			p.logger.Debug("scanner metadata response read failed", "ecosystem", eco, "error", err)
+		}
+	}
+
 	for k, vv := range resp.Header {
-		if brokercore.ShouldStripResponseHeader(k) {
+		if brokercore.ShouldStripResponseHeader(k) || k == "Content-Length" {
 			continue
 		}
 		for _, v := range vv {
@@ -300,6 +364,6 @@ func (p *Proxy) forwardRequest(
 		}
 	}
 	w.WriteHeader(resp.StatusCode)
-	_, _ = io.Copy(w, io.LimitReader(resp.Body, brokercore.MaxResponseBytes))
+	_, _ = io.Copy(w, resp.Body)
 	emit(resp.StatusCode, "")
 }
